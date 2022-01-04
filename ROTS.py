@@ -28,7 +28,11 @@ def main(argv):
         os.makedirs(experim_path)
     except FileExistsError:
         pass
-    gamma, FLAGS.rots_lambda = get_hyparams(FLAGS.dataset_name)
+    if FLAGS.rots_lambda==-1:
+        gamma, FLAGS.rots_lambda = get_hyparams(FLAGS.dataset_name)
+    else:
+        gamma, _ = get_hyparams(FLAGS.dataset_name)
+        
     rots_train_path = "{}/TrainingRes/ROTS_lambda_{}_beta_{}".format(experim_path, FLAGS.rots_lambda, FLAGS.rots_beta)
     train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(FLAGS.batch)
     rots_model = cnn_class("ROTS_"+FLAGS.dataset_name, SEG_SIZE, CHANNEL_NB, CLASS_NB, arch='2')
@@ -42,6 +46,6 @@ if __name__=="__main__":
     flags.DEFINE_integer('batch', 20, 'Batch Size')
     flags.DEFINE_integer('K', 100, 'ROTS Iterations')
     flags.DEFINE_integer('rots_gak_sample', 10, 'ROTS GAK path sampling')
-    flags.DEFINE_float('rots_lambda', 10, 'ROTS lambda value')
+    flags.DEFINE_float('rots_lambda', -1, 'ROTS lambda value')
     flags.DEFINE_float('rots_beta', 5e-2, 'ROTS beta value')
     app.run(main)            
