@@ -5,7 +5,7 @@ Python Implementation of RObustTraining forTime-Series (ROTS) for the paper: "[T
 ```
 pip install -r requirements.txt
 ```
--By default, data is stored in `experim_path_{dataset_name}`. Directory can be changed in `ROTS.py`
+- By default, data is stored in `experim_path_{dataset_name}`. Directory can be changed in `ROTS.py`
 
 ## Run
 - Example run
