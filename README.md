@@ -1,5 +1,5 @@
 # ROTS
-Python Implementation of RObustTraining forTime-Series (ROTS) for the paper: "[Training Robust Deep Models for Time-Series Domain: Novel Algorithms and Theoretical Analysis]" by Taha Belkhouja, Yan Yan, and Janardhan Rao Doppa.
+Python Implementation of RObustTraining forTime-Series (ROTS) for the paper: "[Training Robust Deep Models for Time-Series Domain: Novel Algorithms and Theoretical Analysis]()" by Taha Belkhouja, Yan Yan, and Janardhan Rao Doppa.
 
 ## Setup 
 ```
