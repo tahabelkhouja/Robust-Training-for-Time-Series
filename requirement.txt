@@ -1,0 +1,5 @@
+json
+matplotlib
+numpy
+pickle
+tensorflow
