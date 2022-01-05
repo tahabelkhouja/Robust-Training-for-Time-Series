@@ -18,5 +18,9 @@ python preprocess_dataset.py --dataset_name=SyntheticControl --multivariate=Fals
 The results will be stored in `Dataset` directory. 
 
 ## Run
-- Example run
+- Example  training run
 ```python ROTS.py --dataset_name=SyntheticControl --K=50 --rots_beta=5e-2```
+
+- Example testing run
+```python testROTSmodel.py --dataset_name=SyntheticControl --rots_lambda=1.0```
+
