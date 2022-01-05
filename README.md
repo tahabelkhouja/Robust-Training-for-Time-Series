@@ -12,7 +12,9 @@ pip install -r requirements.txt
 The dataset can be obtained as .zip file from "[The UCR Time Series Classification Repository](http://www.timeseriesclassification.com/dataset.php)".
 Download the .zip file and extract it it in `UCRDatasets/{dataset_name}` directory.
 Run the following command for pre-processing a given dataset while specifying if it is multivariate, for example, on SyntheticControl dataset
-```python preprocess_dataset.py --dataset_name=SyntheticControl --multivariate=False```
+```
+python preprocess_dataset.py --dataset_name=SyntheticControl --multivariate=False
+```
 The results will be stored in `Dataset` directory. 
 
 ## Run
