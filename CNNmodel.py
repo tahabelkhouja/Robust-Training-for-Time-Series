@@ -1,11 +1,16 @@
 import sys
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import time
+
 
 
 import numpy as np
 import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+      
 import pickle as pkl
 from GAK import tf_gak
 
