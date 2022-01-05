@@ -7,6 +7,7 @@ Created on Wed Dec 16 20:31:54 2020
 import numpy as np
 import tensorflow as tf
 
+
 def tf_cdist(s1, s2):
     M1 = s1.shape[0]
     M2 = s2.shape[0]
@@ -20,6 +21,7 @@ def tf_cdist(s1, s2):
     
     res = tf.add(p1, p2) - 2 * tf.matmul(s1, s2, transpose_b=True)
     return res
+    
 
 def tf_gak(S1, S2, gamma, path_limit=np.inf, random_kill=100):
     assert S1.shape==S2.shape, "GAK input shapes  mismatch"
@@ -57,7 +59,7 @@ def tf_gak(S1, S2, gamma, path_limit=np.inf, random_kill=100):
                                                                   gak_dist[(i-1, j)],
                                                                   gak_dist[(i-1, j-1)]]))
                     
-        gak_dist_list.append(tf.math.log(gak_dist[M1-1, M1-1]))
+        gak_dist_list.append(tf.math.log(tf.convert_to_tensor(gak_dist[M1-1, M1-1], dtype=tf.float64)))
     return gak_dist_list
 
 

@@ -153,16 +153,13 @@ class cnn_class():
                 
                 
     
-    def rots_train(self, train_set, a_shape, 
-                   checkpoint_path="TrainingRes/rots_model",
+    def rots_train(self, train_set, a_shape, nb_batches, checkpoint_path="TrainingRes/rots_model",
                    gamma_gak=1, gak_sampled_paths=100, path_limit=100,
-                   K=100, lbda=1.0, gamma_k=1, eta_k=1e-2, 
-                   beta=5e-2, a_init=1e-1, omega=1e-3,
-                   new_train=False, X_valid=[], y_valid=[], uses_L2=False,
-                   verbose=False):
+                   K=100, lbda=1.0, gamma_k=1, eta_k=1e-2, beta=5e-2, a_init=1e-2, omega=1e-3,
+                   X_valid=[], y_valid=[], 
+                   uses_L2=False, new_train=False, verbose=False):
         model_path = checkpoint_path+'/'+self.name
         self.omega = omega
-        
         #decaying l_r of eta_k 
         boundaries = list(np.arange(np.ceil(K/4),K, 1e-2*K))
         values = [eta_k]
@@ -178,14 +175,16 @@ class cnn_class():
             if i%10==0:
                 gamma_k_init /= 10
             gamma_k_decay.append(gamma_k_init)
-            
+        gamma_k_decay = tf.convert_to_tensor(gamma_k_decay, dtype=tf.float64)
+               
         def sample_function(input_data):
-            rand_batch = np.random.randint(0, len(input_data)-1)
+            rand_batch = np.random.randint(0, nb_batches-1)
             i=0
             for X, y in input_data:
                 if i==rand_batch:
                     return X, y
                 else: i+=1
+        
         
         def dist_func(x1, x2, use_log=True, path_limit=path_limit):
             if use_log:
@@ -202,7 +201,7 @@ class cnn_class():
                 if verbose: sys.stdout.write("\n---Current Loss_w:", loss_it)
             return G_w
             
-        @tf.function
+        @tf.function    
         def Ga_ro_train_step(X, y, a, lbda):
             with tf.GradientTape() as tape2: 
                 tape2.watch(a)
@@ -218,6 +217,7 @@ class cnn_class():
                 
             G_a = tf.add(G_a_pred, tf.multiply(lbda, tf.add(G_omega,a)))
             return G_a
+        
         @tf.function
         def Ga_euclidean(X, y, a, lbda):
             with tf.GradientTape() as tape2: 
@@ -230,42 +230,48 @@ class cnn_class():
                 G_a = tf.add(grad_a, tf.multiply(lbda, a))
             return G_a
             
+        
+        def rots_train_step(X, y):
+            G_w = GW_ro_train_step(X, y, self.a, self.lbda) #Get the gradient
+            self.ro_optimizer.apply_gradients(zip(G_w, self.model.trainable_variables)) #line 6
+            if not uses_L2: #line 7
+                G_a = Ga_ro_train_step(X, y, self.a, self.lbda)
+            else:
+                G_a = Ga_euclidean(X, y, self.a, self.lbda)
+            self.a = tf.add(self.a, tf.multiply(self.gamma_k_value, G_a)) #line 13
             
         if not new_train:
             self.model.load_weights(model_path)
             sys.stdout.write("\nWeights loaded!")
         else:
-            sys.stdout.write("\nRO training ...")
-            #a = tf.Variable(a_init, dtype=tf.float64)
-            a = a_init * tf.ones(a_shape, dtype=tf.float64)
+            sys.stdout.write("\nROTS training ...")
+                    
+            self.a = a_init * tf.ones(a_shape, dtype=tf.float64)
             beta= tf.Variable(beta, dtype=tf.float64)
-            lbda = tf.cast(lbda,  dtype=tf.float64)            
+            self.lbda = tf.cast(lbda,  dtype=tf.float64)            
             min_loss = np.inf
-            grads = []
             for k in range(K): 
+                sys.stdout.write("\nK={}/{}".format(k+1, K))
+                sys.stdout.flush()
                 t1 = time.time()
                 X, y = sample_function(train_set) #line 4 
-                G_w = GW_ro_train_step(X, y, a, lbda) #Get the gradient
-                self.ro_optimizer.apply_gradients(zip(G_w, self.model.trainable_variables)) #line 6
-                if not uses_L2: #line 7
-                    G_a = Ga_ro_train_step(X, y, a, lbda)
-                else:
-                    G_a = Ga_euclidean(X, y, a, lbda)
-                    
-                a = tf.add(a, tf.multiply(gamma_k_decay[k], G_a)) #line 13
-                self.model.save_weights(model_path)                    
-                grads.append((G_w, G_a))
-                pkl.dump(grads, open("Grads/grad_"+str(path_limit)+self.name+".pkl", "wb"))
+                self.gamma_k_value = gamma_k_decay[k]
+                rots_train_step(X, y) 
+                self.model.save_weights(model_path)                  
                 ### Save best weights
-                pred_t = self.model(X_valid)
-                loss_t = self.loss_fn(y_valid, pred_t)
-                if loss_t < min_loss:
-                    best_W_T = self.ro_optimizer.get_weights()
-                    if verbose: sys.stdout.write("\nBest weight validatio score: {:.2f}".format(self.score(X_valid, y_valid)), flush=True)
-                    min_loss = loss_t
+                if len(X_valid)>0: 
+                    pred_t = self.model(X_valid)
+                    loss_t = self.loss_fn(y_valid, pred_t)
+                    if loss_t < min_loss:
+                        best_W_T = self.ro_optimizer.get_weights()
+                        if verbose: sys.stdout.write("\nBest weight validatio score: {:.2f}".format(self.score(X_valid, y_valid)))
+                        min_loss = loss_t
                 t2 = time.time()
-                sys.stdout.write("\nK={}/{} executed in {:.2f} min . . .Score: {:.2f}".format(k+1, K, ((t2-t1)/60), self.score(X, y)), flush=True)
-            self.ro_optimizer.set_weights(best_W_T) 
+                sys.stdout.write(" executed in {:.2f} min . . .Score: {:.2f}".format(((t2-t1)/60), self.score(X, y)))
+                sys.stdout.flush()
+            
+            if len(X_valid)>0: 
+                self.ro_optimizer.set_weights(best_W_T) 
             self.model.save_weights(model_path)
             
     def predict(self, X):

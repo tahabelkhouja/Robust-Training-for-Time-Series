@@ -1,6 +1,6 @@
 import sys
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = "2"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = "3"
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
 import json
@@ -37,12 +37,27 @@ def main(argv):
     else:
         gamma, _ = get_hyparams(FLAGS.dataset_name)
         
+    
     rots_train_path = "{}/TrainingRes/ROTS_lambda_{}_beta_{}".format(experim_path, FLAGS.rots_lambda, FLAGS.rots_beta)
-    train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(FLAGS.batch)
+    validation_size = int(0.1*X_train.shape[0])
     rots_model = cnn_class("ROTS_"+FLAGS.dataset_name, SEG_SIZE, CHANNEL_NB, CLASS_NB, arch='2')
-    rots_model.rots_train(train_ds, a_shape=(SEG_SIZE, CHANNEL_NB), gamma_gak=gamma, K=FLAGS.K, path_limit=FLAGS.rots_gak_sample,
+    
+    if FLAGS.save_with_valid:
+        X_valid = X_train[-validation_size:]
+        y_valid = y_train[-validation_size:]
+        train_ds = tf.data.Dataset.from_tensor_slices((X_train[:-validation_size], y_train[:-validation_size])).batch(FLAGS.batch)
+        nb_batches = X_train.shape[0]//FLAGS.batch - 1
+        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), nb_batches, gamma_gak=gamma, K=FLAGS.K, path_limit=FLAGS.rots_gak_sample,
                 new_train=True, checkpoint_path=rots_train_path,
-                gamma_k=5e-2, lbda=FLAGS.rots_lambda, a_init=1e-1, eta_k=1e-2, beta=FLAGS.rots_beta,
+                X_valid=X_valid, y_valid=y_valid,
+                gamma_k=5e-2, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
+                verbose=False)
+    else:
+        train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(FLAGS.batch)
+        nb_batches = X_train.shape[0]//FLAGS.batch - 1
+        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), nb_batches, gamma_gak=gamma, K=FLAGS.K, path_limit=FLAGS.rots_gak_sample,
+                new_train=True, checkpoint_path=rots_train_path,
+                gamma_k=5e-2, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
                 verbose=False)
         
 if __name__=="__main__":
@@ -50,6 +65,8 @@ if __name__=="__main__":
     flags.DEFINE_integer('batch', 11, 'Batch Size')
     flags.DEFINE_integer('K', 100, 'ROTS Iterations')
     flags.DEFINE_integer('rots_gak_sample', 5, 'ROTS GAK path sampling')
+    flags.DEFINE_float('vs', 0.1, 'Validation ratio from training')
     flags.DEFINE_float('rots_lambda', -1, 'ROTS lambda value')
     flags.DEFINE_float('rots_beta', 5e-2, 'ROTS beta value')
+    flags.DEFINE_boolean('save_with_valid', True, 'Save best weight using validation set')
     app.run(main)            

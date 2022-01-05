@@ -1,5 +1,4 @@
-json
 matplotlib
 numpy
-pickle
-tensorflow
+sklearn
+tensorflow==2.1.0-gpu
