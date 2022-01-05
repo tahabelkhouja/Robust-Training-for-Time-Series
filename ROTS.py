@@ -10,6 +10,7 @@ from absl import app, flags
 from CNNmodel import cnn_class
 from hyparamtuning import get_hyparams
 FLAGS = flags.FLAGS
+
 def main(argv):
     json_param = "datasets_parameters.json"
     with open(json_param) as jf:

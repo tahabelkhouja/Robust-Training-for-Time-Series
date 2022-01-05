@@ -1,58 +1,62 @@
 {
   "BME": {
-    "path": "UCRData_UV/BME.pkl",
+    "path": "Dataset/BME.pkl",
     "SEG_SIZE": 129,
     "CHANNEL_NB": 1,
     "CLASS_NB": 3
   },
   "ECG200": {
-    "path": "UCRData_UV/ECG200.pkl",
+    "path": "Dataset/ECG200.pkl",
     "SEG_SIZE": 97,
     "CHANNEL_NB": 1,
     "CLASS_NB": 2
   },
   "ECG5000": {
-    "path": "UCRData_UV/ECG5000.pkl",
+    "path": "Dataset/ECG5000.pkl",
     "SEG_SIZE": 141,
     "CHANNEL_NB": 1,
     "CLASS_NB": 5
-  },  
+  },
   "Epilepsy": {
-    "path": "UCRData_MV/Epilepsy.pkl",
+    "path": "Dataset/Epilepsy.pkl",
     "SEG_SIZE": 206,
     "CHANNEL_NB": 3,
     "CLASS_NB": 4
   },
   "ERing": {
-    "path": "UCRData_MV/ERing.pkl",
+    "path": "Dataset/ERing.pkl",
     "SEG_SIZE": 65,
     "CHANNEL_NB": 4,
     "CLASS_NB": 6
   },
-  
   "FingerMovements": {
-    "path": "UCRData_MV/FingerMovements.pkl",
+    "path": "Dataset/FingerMovements.pkl",
     "SEG_SIZE": 50,
     "CHANNEL_NB": 28,
     "CLASS_NB": 2
   },
   "MoteStrain": {
-    "path": "UCRData_UV/MoteStrain.pkl",
+    "path": "Dataset/MoteStrain.pkl",
     "SEG_SIZE": 85,
     "CHANNEL_NB": 1,
     "CLASS_NB": 2
-  },  
+  },
   "RacketSports": {
-    "path": "UCRData_MV/RacketSports.pkl",
+    "path": "Dataset/RacketSports.pkl",
     "SEG_SIZE": 30,
     "CHANNEL_NB": 6,
     "CLASS_NB": 4
   },
   "SyntheticControl": {
-    "path": "UCRData_UV/SyntheticControl.pkl",
+    "path": "Dataset/SyntheticControl.pkl",
     "SEG_SIZE": 61,
     "CHANNEL_NB": 1,
     "CLASS_NB": 6
+  },
+  "Cricket": {
+    "path": "Dataset/Cricket.pkl",
+    "SEG_SIZE": 1197,
+    "CHANNEL_NB": 6,
+    "CLASS_NB": 12
   }
-  
 }
