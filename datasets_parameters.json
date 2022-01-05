@@ -49,14 +49,8 @@
   },
   "SyntheticControl": {
     "path": "Dataset/SyntheticControl.pkl",
-    "SEG_SIZE": 61,
+    "SEG_SIZE": 60,
     "CHANNEL_NB": 1,
     "CLASS_NB": 6
-  },
-  "Cricket": {
-    "path": "Dataset/Cricket.pkl",
-    "SEG_SIZE": 1197,
-    "CHANNEL_NB": 6,
-    "CLASS_NB": 12
   }
 }

@@ -43,10 +43,10 @@ def main(argv):
                 verbose=False)
         
 if __name__=="__main__":
-    flags.DEFINE_string('dataset_name', 'BME', 'Dataset name')
-    flags.DEFINE_integer('batch', 20, 'Batch Size')
+    flags.DEFINE_string('dataset_name', 'SyntheticControl', 'Dataset name')
+    flags.DEFINE_integer('batch', 11, 'Batch Size')
     flags.DEFINE_integer('K', 100, 'ROTS Iterations')
-    flags.DEFINE_integer('rots_gak_sample', 10, 'ROTS GAK path sampling')
+    flags.DEFINE_integer('rots_gak_sample', 5, 'ROTS GAK path sampling')
     flags.DEFINE_float('rots_lambda', -1, 'ROTS lambda value')
     flags.DEFINE_float('rots_beta', 5e-2, 'ROTS beta value')
     app.run(main)            

@@ -144,7 +144,7 @@ def main(argv):
         json.dump(info, jf, indent=2)
         
 if __name__=="__main__":
-    flags.DEFINE_string('dataset_name', 'Adiac', 'Dataset name')
+    flags.DEFINE_string('dataset_name', 'SyntheticControl ', 'Dataset name')
     flags.DEFINE_boolean('multivariate', False, 'Dataset Is multivariate')
     app.run(main)   
     
