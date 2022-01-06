@@ -30,7 +30,7 @@ def main(argv):
     rots_train_path = "{}/TrainingRes/ROTS_lambda_{}_beta_{}".format(experim_path, FLAGS.rots_lambda, FLAGS.rots_beta)
     rots_model.rots_train([],[],[], checkpoint_path=rots_train_path, new_train=False)
     score = rots_model.score(X_test, y_test)
-    sys.stdout.write("\nPerformance of {} ROTS training: {} on test data\n".format(FLAGS.dataset_name, score))
+    sys.stdout.write("\nPerformance of {} ROTS training: {:.2f} on test data\n".format(FLAGS.dataset_name, score))
 if __name__=="__main__":
     flags.DEFINE_string('dataset_name', 'SyntheticControl', 'Dataset name')
     flags.DEFINE_float('rots_lambda', -1, 'ROTS lambda value')
