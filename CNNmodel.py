@@ -1,6 +1,5 @@
 import sys
 import os
-import time
 
 
 
@@ -253,7 +252,6 @@ class cnn_class():
             for k in range(K): 
                 sys.stdout.write("\nK={}/{}".format(k+1, K))
                 sys.stdout.flush()
-                t1 = time.time()
                 X, y = sample_function(train_set) #line 4 
                 self.gamma_k_value = gamma_k_decay[k]
                 rots_train_step(X, y) 
@@ -266,8 +264,7 @@ class cnn_class():
                         best_W_T = self.ro_optimizer.get_weights()
                         if verbose: sys.stdout.write("\nBest weight validatio score: {:.2f}".format(self.score(X_valid, y_valid)))
                         min_loss = loss_t
-                t2 = time.time()
-                sys.stdout.write(" executed in {:.2f} min . . .Score: {:.2f}".format(((t2-t1)/60), self.score(X, y)))
+                sys.stdout.write("  . . . Validation Score: {:.2f}".format((self.score(X, y)))
                 sys.stdout.flush()
             
             if len(X_valid)>0: 
