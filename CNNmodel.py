@@ -265,7 +265,7 @@ class cnn_class():
                         if verbose: sys.stdout.write("\nBest weight validatio score: {:.2f}".format(self.score(X_valid, y_valid)))
                         min_loss = loss_t
                     sys.stdout.write("  . . . Validation Score: {:.2f}".format((self.score(X_valid, y_valid)))
-                sys.stdout.flush()
+                    sys.stdout.flush()
             
             if len(X_valid)>0: 
                 self.ro_optimizer.set_weights(best_W_T) 
