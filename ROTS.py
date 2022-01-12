@@ -25,9 +25,9 @@ def main(argv):
         CLASS_NB = d['CLASS_NB']
     #Data Reading
     X_train, y_train, X_test, y_test = pkl.load(open(path, 'rb'))    
-    sys.stdout.write("{} - Shape:{}\n".format(FLAGS.dataset_name, X_train.shape))
+    sys.stdout.write("{} - Shape:{}".format(FLAGS.dataset_name, X_train.shape))
     #Model Training
-    experim_path = "Experiment_"+FLAGS.dataset_name
+    experim_path = "Experiments/Experiment_"+FLAGS.dataset_name
     try:
         os.makedirs(experim_path)
     except FileExistsError:
@@ -39,34 +39,37 @@ def main(argv):
         
     
     rots_train_path = "{}/TrainingRes/ROTS_lambda_{}_beta_{}".format(experim_path, FLAGS.rots_lambda, FLAGS.rots_beta)
-    validation_size = int(0.1*X_train.shape[0])
-    rots_model = cnn_class("ROTS_"+FLAGS.dataset_name, SEG_SIZE, CHANNEL_NB, CLASS_NB, arch='2')
+    rots_model = cnn_class("ROTS_"+FLAGS.dataset_name, SEG_SIZE, CHANNEL_NB, CLASS_NB, arch='2')    
     
     if FLAGS.save_with_valid:
+        validation_size = int(0.1*X_train.shape[0])
         X_valid = X_train[-validation_size:]
         y_valid = y_train[-validation_size:]
-        train_ds = tf.data.Dataset.from_tensor_slices((X_train[:-validation_size], y_train[:-validation_size])).batch(FLAGS.batch)
-        nb_batches = X_train.shape[0]//FLAGS.batch - 1
-        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), nb_batches, gamma_gak=gamma, K=FLAGS.K, path_limit=FLAGS.rots_gak_sample,
+        total_iter = (X_train[:-validation_size].shape[0] * FLAGS.K)//FLAGS.batch + 1
+        train_ds = tf.data.Dataset.from_tensor_slices((X_train[:-validation_size], y_train[:-validation_size]))\
+                    .shuffle(X_train[:-validation_size].shape[0]).repeat(FLAGS.K).batch(FLAGS.batch, drop_remainder=True)
+        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), total_iter, gamma_gak=gamma, path_limit=FLAGS.rots_gak_sample,
                 new_train=True, checkpoint_path=rots_train_path,
                 X_valid=X_valid, y_valid=y_valid,
-                gamma_k=5e-2, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
+                gamma_k=FLAGS.gamma_k, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
                 verbose=False)
     else:
-        train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(FLAGS.batch)
-        nb_batches = X_train.shape[0]//FLAGS.batch - 1
-        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), nb_batches, gamma_gak=gamma, K=FLAGS.K, path_limit=FLAGS.rots_gak_sample,
+        total_iter = (X_train.shape[0] * FLAGS.K)//FLAGS.batch + 1
+        train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train))\
+                    .shuffle(X_train.shape[0]).repeat(FLAGS.K).batch(FLAGS.batch, drop_remainder=True)
+        rots_model.rots_train(train_ds, (SEG_SIZE, CHANNEL_NB), total_iter, gamma_gak=gamma, path_limit=FLAGS.rots_gak_sample,
                 new_train=True, checkpoint_path=rots_train_path,
-                gamma_k=5e-2, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
+                gamma_k=FLAGS.gamma_k, lbda=FLAGS.rots_lambda,  beta=FLAGS.rots_beta,
                 verbose=False)
         
 if __name__=="__main__":
     flags.DEFINE_string('dataset_name', 'SyntheticControl', 'Dataset name')
     flags.DEFINE_integer('batch', 11, 'Batch Size')
-    flags.DEFINE_integer('K', 100, 'ROTS Iterations')
+    flags.DEFINE_integer('K', 10, 'ROTS Iterations')
     flags.DEFINE_integer('rots_gak_sample', 5, 'ROTS GAK path sampling')
     flags.DEFINE_float('vs', 0.1, 'Validation ratio from training')
+    flags.DEFINE_float('gamma_k', 5e-2, 'gamma_k')
     flags.DEFINE_float('rots_lambda', -1, 'ROTS lambda value')
     flags.DEFINE_float('rots_beta', 5e-2, 'ROTS beta value')
-    flags.DEFINE_boolean('save_with_valid', True, 'Save best weight using validation set')
+    flags.DEFINE_boolean('save_with_valid', False, 'Save best weight using validation set')
     app.run(main)            

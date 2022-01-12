@@ -24,11 +24,11 @@ def main(argv):
     #Data Reading
     _, _, X_test, y_test = pkl.load(open(path, 'rb'))    
     #Model Training
-    experim_path = "Experiment_"+FLAGS.dataset_name
+    experim_path = "Experiments/Experiment_"+FLAGS.dataset_name
         
     rots_model = cnn_class("ROTS_"+FLAGS.dataset_name, SEG_SIZE, CHANNEL_NB, CLASS_NB, arch='2')
     rots_train_path = "{}/TrainingRes/ROTS_lambda_{}_beta_{}".format(experim_path, FLAGS.rots_lambda, FLAGS.rots_beta)
-    rots_model.rots_train([],[],[], checkpoint_path=rots_train_path, new_train=False)
+    rots_model.rots_train([],[],10, checkpoint_path=rots_train_path, new_train=False)
     score = rots_model.score(X_test, y_test)
     sys.stdout.write("\nPerformance of {} ROTS training: {:.2f} on test data\n".format(FLAGS.dataset_name, score))
 if __name__=="__main__":

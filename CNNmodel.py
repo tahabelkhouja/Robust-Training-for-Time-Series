@@ -1,7 +1,4 @@
 import sys
-import os
-
-
 
 import numpy as np
 import tensorflow as tf
@@ -10,7 +7,6 @@ if gpus:
     for gpu in gpus:
       tf.config.experimental.set_memory_growth(gpu, True)
       
-import pickle as pkl
 from GAK import tf_gak
 
  
@@ -152,37 +148,13 @@ class cnn_class():
                 
                 
     
-    def rots_train(self, train_set, a_shape, nb_batches, checkpoint_path="TrainingRes/rots_model",
+    def rots_train(self, train_set, a_shape, K, checkpoint_path="TrainingRes/rots_model",
                    gamma_gak=1, gak_sampled_paths=100, path_limit=100,
-                   K=100, lbda=1.0, gamma_k=1, eta_k=1e-2, beta=5e-2, a_init=1e-2, omega=1e-3,
+                   lbda=1.0, gamma_k=1, eta_k=1e-2, beta=5e-2, a_init=1e-2, omega=1e-3,
                    X_valid=[], y_valid=[], 
                    uses_L2=False, new_train=False, verbose=False):
+                   
         model_path = checkpoint_path+'/'+self.name
-        self.omega = omega
-        #decaying l_r of eta_k 
-        boundaries = list(np.arange(np.ceil(K/4),K, 1e-2*K))
-        values = [eta_k]
-        for i, _ in enumerate(boundaries):
-            values.append(eta_k/(2**(i+1)))
-        lr_schedule_fn = tf.keras.optimizers.schedules.PiecewiseConstantDecay(boundaries, values)
-        self.ro_optimizer = tf.keras.optimizers.SGD(learning_rate=lr_schedule_fn(tf.Variable(0)))
-        
-        #decaying l_r of gamma_k 
-        gamma_k_init = gamma_k
-        gamma_k_decay = [gamma_k_init]
-        for i in range(1,K):
-            if i%10==0:
-                gamma_k_init /= 10
-            gamma_k_decay.append(gamma_k_init)
-        gamma_k_decay = tf.convert_to_tensor(gamma_k_decay, dtype=tf.float64)
-               
-        def sample_function(input_data):
-            rand_batch = np.random.randint(0, nb_batches-1)
-            i=0
-            for X, y in input_data:
-                if i==rand_batch:
-                    return X, y
-                else: i+=1
         
         
         def dist_func(x1, x2, use_log=True, path_limit=path_limit):
@@ -243,33 +215,54 @@ class cnn_class():
             self.model.load_weights(model_path)
             sys.stdout.write("\nWeights loaded!")
         else:
+            self.omega = omega
+            #decaying l_r of eta_k 
+            boundaries = list(np.arange(np.ceil(K/4),K, 1e-2*K))
+            values = [eta_k]
+            for i, _ in enumerate(boundaries):
+                values.append(eta_k/(2**(i+1)))
+            lr_schedule_fn = tf.keras.optimizers.schedules.PiecewiseConstantDecay(boundaries, values)
+            self.ro_optimizer = tf.keras.optimizers.SGD(learning_rate=lr_schedule_fn(tf.Variable(0)))
+            
+            #decaying l_r of gamma_k 
+            gamma_k_init = gamma_k
+            gamma_k_decay = [gamma_k_init]
+            for i in range(1,K):
+                if i%10==0:
+                    gamma_k_init /= 10
+                gamma_k_decay.append(gamma_k_init)
+            gamma_k_decay = tf.convert_to_tensor(gamma_k_decay, dtype=tf.float64)
+               
             sys.stdout.write("\nROTS training ...")
                     
             self.a = a_init * tf.ones(a_shape, dtype=tf.float64)
             beta= tf.Variable(beta, dtype=tf.float64)
             self.lbda = tf.cast(lbda,  dtype=tf.float64)            
             min_loss = np.inf
-            for k in range(K): 
-                sys.stdout.write("\nK={}/{}".format(k+1, K))
+            k = 0
+            for X, y in train_set:
+                k += 1
+                if k%10==1:sys.stdout.write("\nK={}/{}".format(k, K))
                 sys.stdout.flush()
-                X, y = sample_function(train_set) #line 4 
                 self.gamma_k_value = gamma_k_decay[k]
                 rots_train_step(X, y) 
+                sys.stdout.flush()  
                 self.model.save_weights(model_path)                  
                 ### Save best weights
                 if len(X_valid)>0: 
                     pred_t = self.model(X_valid)
                     loss_t = self.loss_fn(y_valid, pred_t)
-                    if loss_t < min_loss:
+                    if loss_t <= min_loss:
                         best_W_T = self.ro_optimizer.get_weights()
                         if verbose: sys.stdout.write("\nBest weight validatio score: {:.2f}".format(self.score(X_valid, y_valid)))
                         min_loss = loss_t
-                    sys.stdout.write("  . . . Validation Score: {:.2f}".format((self.score(X_valid, y_valid))))
+                    sys.stdout.write("  . . . Validation Score: {:.2f}\n".format((self.score(X_valid, y_valid))))
                     sys.stdout.flush()
             
             if len(X_valid)>0: 
                 self.ro_optimizer.set_weights(best_W_T) 
-            self.model.save_weights(model_path)
+                self.model.save_weights(model_path)
+        print()
             
     def predict(self, X):
         return tf.argmax(self.model(X, training=False), 1)

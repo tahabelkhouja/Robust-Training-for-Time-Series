@@ -25,6 +25,6 @@ def get_hyparams(dataset_name):
         for j in range(i+1, D.shape[1]):
             D_T.append(D[i,j])
     gamma = np.median(D_T)
-    lbda = 10**-(np.ceil(np.log(gamma)/np.log(10))-2)
+    lbda = 10**-(np.ceil(np.log(gamma)/np.log(10))-2) #start value
     return gamma, lbda
     
