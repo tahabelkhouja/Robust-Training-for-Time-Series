@@ -19,8 +19,12 @@ The results will be stored in `Dataset` directory.
 
 ## Run
 - Example  training run
-```python ROTS.py --dataset_name=SyntheticControl --K=10 --rots_beta=5e-1 --rots_lambda=1e-2 --batch=11```
+```
+python ROTS.py --dataset_name=SyntheticControl --K=10 --rots_beta=5e-1 --rots_lambda=1e-2 --batch=11
+```
 
 - Example testing run
-```python testROTSmodel.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2```
+```
+python testROTSmodel.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2
+```
 
