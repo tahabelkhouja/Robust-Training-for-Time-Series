@@ -23,7 +23,7 @@ def tf_cdist(s1, s2):
     return res
     
 
-def tf_gak(S1, S2, gamma, path_limit=np.inf, random_kill=100):
+def tf_gak(S1, S2, gamma, path_limit=np.inf, random_kill=5):
     assert S1.shape==S2.shape, "GAK input shapes  mismatch"
     assert len(S1.shape) > 2, "GAK input's shape error"
     kill = lambda: np.random.choice([True, False], 1, p=[1/random_kill, 1-(1/random_kill)])[0]
@@ -55,9 +55,9 @@ def tf_gak(S1, S2, gamma, path_limit=np.inf, random_kill=100):
                     gak_dist[(i, j)] = 0
                 else:
                     gak_dist[(i, j)] = tf.multiply(kga_gram[i, j], 
-                                                   tf.reduce_sum([gak_dist[(i, j-1)],
+                                                   tf.reduce_sum(tf.convert_to_tensor([gak_dist[(i, j-1)],
                                                                   gak_dist[(i-1, j)],
-                                                                  gak_dist[(i-1, j-1)]]))
+                                                                  gak_dist[(i-1, j-1)]], dtype=tf.float64)))
                     
         gak_dist_list.append(tf.math.log(tf.convert_to_tensor(gak_dist[M1-1, M1-1], dtype=tf.float64)))
     return gak_dist_list

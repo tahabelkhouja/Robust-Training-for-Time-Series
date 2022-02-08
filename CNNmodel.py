@@ -1,4 +1,5 @@
 import sys
+import os
 
 import numpy as np
 import tensorflow as tf
@@ -7,6 +8,7 @@ if gpus:
     for gpu in gpus:
       tf.config.experimental.set_memory_growth(gpu, True)
       
+import pickle as pkl
 from GAK import tf_gak
 
  
@@ -149,19 +151,29 @@ class cnn_class():
                 
     
     def rots_train(self, train_set, a_shape, K, checkpoint_path="TrainingRes/rots_model",
-                   gamma_gak=1, gak_sampled_paths=100, path_limit=100,
+                   gamma_gak=1, gak_sampled_paths=100, path_limit=100, gak_random_kill=5,
                    lbda=1.0, gamma_k=1, eta_k=1e-2, beta=5e-2, a_init=1e-2, omega=1e-3,
                    X_valid=[], y_valid=[], 
                    uses_L2=False, new_train=False, verbose=False):
                    
         model_path = checkpoint_path+'/'+self.name
         
+        def sample_function(input_data):
+            rand_batch = np.random.randint(0, nb_batches)
+            i=0
+            warnings.warn("\nSample function details: nb_batches:{} - rand_batch:{}".format(nb_batches, rand_batch))
+            for X, y in input_data:                
+                warnings.warn("\nSample function In-Loop: i:{} - X:{}".format(i, X))
+                if i==rand_batch:
+                    return X, y
+                i += 1
+        
         
         def dist_func(x1, x2, use_log=True, path_limit=path_limit):
             if use_log:
-                return -tf.math.log(tf_gak(x1, x2, gamma_gak, path_limit=path_limit))
+                return -tf.math.log(tf_gak(x1, x2, gamma_gak, path_limit=path_limit, random_kill=gak_random_kill))
             else:
-                return tf_gak(x1, x2, gamma_gak, path_limit=path_limit)      
+                return tf_gak(x1, x2, gamma_gak, path_limit=path_limit, random_kill=gak_random_kill)      
         
         @tf.function
         def GW_ro_train_step(X, y, a, lbda):
@@ -244,6 +256,7 @@ class cnn_class():
                 k += 1
                 if k%10==1:sys.stdout.write("\nK={}/{}".format(k, K))
                 sys.stdout.flush()
+                #X, y = sample_function(train_set) #line 4 
                 self.gamma_k_value = gamma_k_decay[k]
                 rots_train_step(X, y) 
                 sys.stdout.flush()  
