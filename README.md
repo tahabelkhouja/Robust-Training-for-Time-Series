@@ -1,11 +1,11 @@
-# ROTS
-Python Implementation of RObustTraining forTime-Series (ROTS) for the paper: "[Training Robust Deep Models for Time-Series Domain: Novel Algorithms and Theoretical Analysis]()" by Taha Belkhouja, Yan Yan, and Janardhan Rao Doppa.
+# Robust Training for Time-Series
+Python Implementation of RObustTraining forTime-Series (RO-TS) for the paper: "[Training Robust Deep Models for Time-Series Domain: Novel Algorithms and Theoretical Analysis]()" by Taha Belkhouja, Yan Yan, and Janardhan Rao Doppa.
 
 ## Setup 
 ```
 pip install -r requirement.txt
 ```
-By default, data is stored in `experim_path_{dataset_name}`. Directory can be changed in `ROTS.py`
+By default, data is stored in `experim_path_{dataset_name}`. Directory can be changed in `RO_TS.py`
 
 
 ## Obtain datasets
@@ -20,11 +20,11 @@ The results will be stored in `Dataset` directory.
 ## Run
 - Example  training run
 ```
-python ROTS.py --dataset_name=SyntheticControl --K=10 --rots_beta=5e-1 --rots_lambda=1e-2 --batch=11
+python RO_TS.py --dataset_name=SyntheticControl --K=10 --rots_beta=5e-1 --rots_lambda=1e-2 --batch=11
 ```
 
 - Example testing run
 ```
-python testROTSmodel.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2
+python test_RO_TS_modeltest_RO_TS_model.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2
 ```
 
