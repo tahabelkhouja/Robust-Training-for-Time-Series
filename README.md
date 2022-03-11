@@ -25,6 +25,6 @@ python RO_TS.py --dataset_name=SyntheticControl --K=10 --rots_beta=5e-1 --rots_l
 
 - Example testing run
 ```
-python test_RO_TS_modeltest_RO_TS_model.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2
+python test_RO_TS_model.py --dataset_name=SyntheticControl --rots_beta=5e-1 --rots_lambda=1e-2
 ```
 
