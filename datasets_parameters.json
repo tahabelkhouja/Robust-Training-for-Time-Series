@@ -49,7 +49,7 @@
   },
   "SyntheticControl": {
     "path": "Dataset/SyntheticControl.pkl",
-    "SEG_SIZE": 60,
+    "SEG_SIZE": 61,
     "CHANNEL_NB": 1,
     "CLASS_NB": 6
   }
